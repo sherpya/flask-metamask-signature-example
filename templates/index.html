@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Wallet Signature</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+</head>
+
+<body>
+    <h1>Wallet Signature</h1>
+    <div><button id="sign-button">Ask the message and sign</button></div>
+    <div id="status"></div>
+
+    <script type="module">
+        const signButton = document.getElementById('sign-button');
+        const status = document.getElementById('status');
+
+        async function handleSignRequest() {
+            try {
+                status.textContent = '';
+
+                // TODO: if window.ethereum is undefined, prompt user to intall Metamask
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+
+                // This triggers metamask connection if not already done
+                await provider.send('eth_requestAccounts', []);
+
+                const signer = provider.getSigner();
+
+                const walletAddress = await signer.getAddress();
+
+                let res = await fetch(`/message/${walletAddress}`);
+                let data = await res.json();
+                const message = data.message;
+
+                const signature = await signer.provider.send('personal_sign', [message, walletAddress]);
+                const body = {
+                    address: walletAddress,
+                    signature: signature
+                };
+
+                res = await fetch('/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                if (!res.ok) {
+                    status.textContent = res.error;
+                    return;
+                }
+
+                data = await res.json();
+                status.textContent = `Verified: ${data.status}`;
+            } catch (error) {
+                status.textContent = JSON.stringify(error);
+            }
+        }
+
+        signButton.addEventListener('click', handleSignRequest);
+    </script>
+</body>
+
+</html>

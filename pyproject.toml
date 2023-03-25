@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "flask-metamask-signature-example"
+version = "0.0.1"
+description = "An example of connecting a web3 wallet, like Metamask, to a Flask backend and verifying the signature of a signed message."
+authors = ["Gianluigi Tiesi <sherpya@netfarm.it>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+Flask = "^2.2.3"
+web3 = "^6.0.0"
+eth-account = "^0.8.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
